@@ -12,7 +12,6 @@ class CustomTextField: UITextField {
     // MARK: - Enum
     enum CustomTextFieldType {
         case title
-        case feeling
     }
     
     private let authFieldType: CustomTextFieldType
@@ -34,8 +33,7 @@ class CustomTextField: UITextField {
         switch authFieldType {
         case .title:
             self.placeholder = "오늘 하루에 이름을 붙여준다면...😀"
-        case .feeling:
-            self.placeholder = "오늘 하루 기분은? 🥰"
+            self.font = .systemFont(ofSize: 16, weight: .bold)
         }
         
     }

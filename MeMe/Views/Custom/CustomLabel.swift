@@ -20,7 +20,7 @@ class CustomLabel: UILabel {
         self.customLabelType = customLabelType
         super.init(frame: .zero)
         
-        self.backgroundColor = .secondarySystemBackground
+        self.backgroundColor = .systemBackground
         self.layer.cornerRadius = 10
         self.clipsToBounds = true
         self.textColor = .label

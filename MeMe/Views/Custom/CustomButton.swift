@@ -26,7 +26,7 @@ class CustomButton: UIButton {
         configuration.titleAlignment = .center
         
         // 공통 스타일 적용
-        let titleFont = UIFont.systemFont(ofSize: 16, weight: .bold)
+        let titleFont = UIFont.systemFont(ofSize: 12, weight: .bold)
         let titleColor = UIColor.label
         
         switch customButtonType {
@@ -40,7 +40,7 @@ class CustomButton: UIButton {
             configuration.title = title
             
             configuration.attributedTitle = AttributedString(title, attributes: AttributeContainer([
-                .font: UIFont.systemFont(ofSize: 12, weight: .bold),
+                .font: titleFont,
                 .foregroundColor: titleColor
             ]))
             
