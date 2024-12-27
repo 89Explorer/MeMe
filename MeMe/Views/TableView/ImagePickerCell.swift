@@ -12,12 +12,14 @@ class ImagePickerCell: UITableViewCell{
     // MARK: - Variables
     static var reuseIdentifier: String = "ImagePickerCell"
     
-    var selectedImageArray: [String] = ["Museum", "Nature"] {
+    var selectedImageArray: [UIImage] = [] {
         didSet {
             // 데이터가 변경될 때 컬렉션뷰를 업데이트
             imageCollelcitonView.reloadData()
         }
     }
+    
+    weak var delegate: ImagePickerCellDelegate?
     
     // MAKR: - UI Componnets
     private let basicView: UIView = {
@@ -52,6 +54,8 @@ class ImagePickerCell: UITableViewCell{
         
         configureConstraints()
         setupDelegate()
+        
+        imageButton.addTarget(self, action: #selector(didSelectedImageButton), for: .touchUpInside)
     }
     
     required init?(coder: NSCoder) {
@@ -105,6 +109,15 @@ class ImagePickerCell: UITableViewCell{
         imageCollelcitonView.register(ImageCell.self, forCellWithReuseIdentifier: ImageCell.resumeIdentifier)
     }
     
+    func updateImage(_ images: [UIImage]) {
+        self.selectedImageArray = images
+    }
+    
+    // MARK: - Acitons
+    @objc private func didSelectedImageButton() {
+        delegate?.didSelectImage()
+    }
+    
 }
 
 // MARK: - Extension
@@ -133,4 +146,9 @@ extension ImagePickerCell: UICollectionViewDelegateFlowLayout {
         let size = CGSize(width: height, height: height)
         return size
     }
+}
+
+protocol ImagePickerCellDelegate: AnyObject {
+    func didSelectImage()
+    func photoAddCell(_ cell: ImagePickerCell, didselctedImages images: [UIImage])
 }

@@ -6,11 +6,13 @@
 //
 
 import UIKit
+import PhotosUI
 
 class FeedViewController: UIViewController {
     
     // MARK: - Variables
     var userMemo: [Memo] = []
+    var selectedImage: [UIImage] = []
     
     // MARK: - UI Componnets
     private let feedTableView: UITableView = {
@@ -74,7 +76,7 @@ class FeedViewController: UIViewController {
             submitButton.heightAnchor.constraint(equalToConstant: 60)
             
         ])
-  
+        
     }
     
     // MARK: - Functions
@@ -106,7 +108,9 @@ extension FeedViewController: UITableViewDelegate, UITableViewDataSource {
         switch FeedType.allCases[indexPath.section] {
         case .image:
             guard let cell = tableView.dequeueReusableCell(withIdentifier: ImagePickerCell.reuseIdentifier, for: indexPath) as? ImagePickerCell else { return UITableViewCell() }
-
+            
+            cell.delegate = self
+            
             return cell
             
         case .title:
@@ -121,7 +125,7 @@ extension FeedViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
         switch FeedType.allCases[indexPath.section] {
-
+            
         case .image:
             return 80
         case .title:
@@ -131,16 +135,16 @@ extension FeedViewController: UITableViewDelegate, UITableViewDataSource {
         }
     }
     
-//    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-//        switch FeedType.allCases[section] {
-//        case .image:
-//            return "이미지"
-//        case .title:
-//            return "제목"
-//        case .content:
-//            return "내용"
-//        }
-//    }
+    //    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+    //        switch FeedType.allCases[section] {
+    //        case .image:
+    //            return "이미지"
+    //        case .title:
+    //            return "제목"
+    //        case .content:
+    //            return "내용"
+    //        }
+    //    }
     func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
         guard let header = view as? UITableViewHeaderFooterView else { return }
         header.textLabel?.font = .systemFont(ofSize: 18, weight: .semibold)
@@ -176,5 +180,71 @@ enum FeedType: CaseIterable {
         case .content:
             return "내용을 입력하세요"
         }
+    }
+}
+
+
+extension FeedViewController: ImagePickerCellDelegate {
+    func photoAddCell(_ cell: ImagePickerCell, didselctedImages images: [UIImage]) {
+        cell.updateImage(images)
+    }
+    
+    func didSelectImage() {
+        presentImagePicker()
+    }
+}
+
+extension FeedViewController: PHPickerViewControllerDelegate {
+    func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
+        picker.dismiss(animated: true)
+        
+        let group = DispatchGroup()
+        
+        for item in results {
+            group.enter()
+            item.itemProvider.loadObject(ofClass: UIImage.self) { (image, error) in
+                
+                defer { group.leave() }
+                
+                if let image = image as? UIImage {
+                    self.selectedImage.append(image)
+                } else if let error = error {
+                    print("Error Loading Image: \(error.localizedDescription)")
+                }
+            }
+            
+        }
+        
+        group.notify(queue: .main) {
+            if let cell = self.feedTableView.cellForRow(at: IndexPath(row: 0, section: 0)) as? ImagePickerCell {
+                self.photoAddCell(cell, didselctedImages: self.selectedImage)
+            }
+        }
+        
+//        for item in results {
+//            item.itemProvider.loadObject(ofClass: UIImage.self) { (image, error) in
+//                if let image = image as? UIImage {
+//                    DispatchQueue.main.async {
+//                        self.selectedImage.append(image)
+//                    }
+//                } else if let error = error {
+//                    print("Error Loading Image: \(error.localizedDescription)")
+//                }
+//            }
+//        }
+        
+                
+    }
+    
+    private func presentImagePicker() {
+        var configuration = PHPickerConfiguration()
+        configuration.filter = .images
+        configuration.selectionLimit = 5
+        configuration.selection = .ordered
+        configuration.preferredAssetRepresentationMode = .automatic
+        
+        let picker = PHPickerViewController(configuration: configuration)
+        picker.delegate = self
+        present(picker, animated: true)
     }
 }

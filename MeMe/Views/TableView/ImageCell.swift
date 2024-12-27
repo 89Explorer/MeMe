@@ -67,7 +67,7 @@ class ImageCell: UICollectionViewCell {
     
     
     // MARK: - Functions
-    func configure(with image: String) {
-        self.imageView.image = UIImage(named: image)
+    func configure(with image: UIImage) {
+        self.imageView.image = image
     }
 }
